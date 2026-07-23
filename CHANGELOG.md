@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.4 - 2026-07-23
+
+- Aligned the Camera Navigation dependency with the canonical adjustable
+  controls contract.
+
 ## 0.1.3 - 2026-07-23
 
 - Added configurable pointer-delta scaling and restored the `0.1` default used

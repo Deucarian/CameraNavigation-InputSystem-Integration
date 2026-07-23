@@ -8,7 +8,7 @@ drives the input-agnostic Deucarian controllers.
 
 Package ID: `com.deucarian.camera-navigation.input-system-integration`
 
-Current package version: `0.1.3`.
+Current package version: `0.1.4`.
 
 ## When to use it
 
