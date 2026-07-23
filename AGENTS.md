@@ -3,8 +3,7 @@
 Package ID: `com.deucarian.camera-navigation.input-system-integration`
 Repository: `Deucarian/CameraNavigation-InputSystem-Integration`
 
-Follow the canonical Deucarian governance docs in Package Registry, especially
-capability ownership and dependency rules.
+Follow the canonical Deucarian governance docs in [Package Registry](https://github.com/Deucarian/Package-Registry/blob/main/ARCHITECTURE.md), especially capability ownership and dependency rules.
 
 ## Ownership
 
