@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.5 - 2026-07-23
+
+- Aligned the exact Camera Navigation dependency with the approved tuned
+  default Orbit and Fly profile.
+
 ## 0.1.4 - 2026-07-23
 
 - Aligned the Camera Navigation dependency with the canonical adjustable
