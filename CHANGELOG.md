@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.1 - 2026-07-23
+
+- Aligned the exact Camera Navigation dependency with the configurable legacy
+  speed-profile release.
+
 ## 0.1.0 - 2026-07-23
 
 - Added configurable Unity Input System Orbit and Fly sources.
