@@ -18,6 +18,7 @@ namespace Deucarian.CameraNavigation.InputSystemIntegration
     public sealed class DeucarianInputSystemNavigationSettings : ScriptableObject
     {
         public const float DefaultOrbitDragThreshold = 25f;
+        public const float DefaultPointerDeltaScale = 0.1f;
         public const float DefaultScrollNormalization = 120f;
 
         [Header("Mouse")]
@@ -31,6 +32,9 @@ namespace Deucarian.CameraNavigation.InputSystemIntegration
             DeucarianMouseButton.Right;
         [SerializeField, Min(0f)] private float orbitDragThreshold =
             DefaultOrbitDragThreshold;
+        [Tooltip("Scales raw Input System pointer pixels before navigation consumes them.")]
+        [SerializeField, Min(0f)] private float pointerDeltaScale =
+            DefaultPointerDeltaScale;
         [SerializeField, Min(0.0001f)] private float scrollNormalization =
             DefaultScrollNormalization;
 
@@ -90,6 +94,12 @@ namespace Deucarian.CameraNavigation.InputSystemIntegration
             set => scrollNormalization = Mathf.Max(0.0001f, value);
         }
 
+        public float PointerDeltaScale
+        {
+            get => Mathf.Max(0f, pointerDeltaScale);
+            set => pointerDeltaScale = Mathf.Max(0f, value);
+        }
+
         public Key MoveForward => moveForward;
         public Key MoveForwardAlternative => moveForwardAlternative;
         public Key MoveBackward => moveBackward;
@@ -110,6 +120,7 @@ namespace Deucarian.CameraNavigation.InputSystemIntegration
         private void OnValidate()
         {
             orbitDragThreshold = Mathf.Max(0f, orbitDragThreshold);
+            pointerDeltaScale = Mathf.Max(0f, pointerDeltaScale);
             scrollNormalization = Mathf.Max(0.0001f, scrollNormalization);
         }
     }

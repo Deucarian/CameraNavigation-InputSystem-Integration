@@ -56,7 +56,9 @@ namespace Deucarian.CameraNavigation.InputSystemIntegration
                 lookButton.isPressed &&
                 !lookDragBlocked &&
                 !pointerBlocked
-                    ? mouse.delta.ReadValue()
+                    ? DeucarianInputSystemDeviceUtility.NormalizePointerDelta(
+                        mouse.delta.ReadValue(),
+                        settings)
                     : Vector2.zero;
             float zoom = mouse != null && !pointerBlocked
                 ? DeucarianInputSystemDeviceUtility.NormalizeScroll(
