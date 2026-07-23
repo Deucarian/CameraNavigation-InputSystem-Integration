@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.2 - 2026-07-23
+
+- Aligned the exact Camera Navigation dependency with its shared Deucarian
+  Editor-styled settings workflow release.
+
 ## 0.1.1 - 2026-07-23
 
 - Aligned the exact Camera Navigation dependency with the configurable legacy
