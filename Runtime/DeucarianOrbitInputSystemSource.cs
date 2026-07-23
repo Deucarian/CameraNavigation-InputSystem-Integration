@@ -98,7 +98,9 @@ namespace Deucarian.CameraNavigation.InputSystemIntegration
             }
 
             return rotateDragStarted && mouse != null
-                ? mouse.delta.ReadValue()
+                ? DeucarianInputSystemDeviceUtility.NormalizePointerDelta(
+                    mouse.delta.ReadValue(),
+                    settings)
                 : Vector2.zero;
         }
 
@@ -121,7 +123,9 @@ namespace Deucarian.CameraNavigation.InputSystemIntegration
                    IsPressed(button) &&
                    !panDragBlocked &&
                    !pointerBlocked
-                ? mouse.delta.ReadValue()
+                ? DeucarianInputSystemDeviceUtility.NormalizePointerDelta(
+                    mouse.delta.ReadValue(),
+                    settings)
                 : Vector2.zero;
         }
 

@@ -92,6 +92,16 @@ namespace Deucarian.CameraNavigation.InputSystemIntegration
                 : scroll / Mathf.Max(0.0001f, normalization);
         }
 
+        internal static Vector2 NormalizePointerDelta(
+            Vector2 delta,
+            DeucarianInputSystemNavigationSettings settings)
+        {
+            float scale = settings != null
+                ? settings.PointerDeltaScale
+                : DeucarianInputSystemNavigationSettings.DefaultPointerDeltaScale;
+            return delta * Mathf.Max(0f, scale);
+        }
+
         private static float ReadAxis(
             Keyboard keyboard,
             Key positive,

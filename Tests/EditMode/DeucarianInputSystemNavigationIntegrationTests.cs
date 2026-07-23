@@ -32,15 +32,21 @@ namespace Deucarian.CameraNavigation.InputSystemIntegration.Tests
                     settings.ScrollNormalization,
                     Is.EqualTo(
                         DeucarianInputSystemNavigationSettings.DefaultScrollNormalization));
+                Assert.That(
+                    settings.PointerDeltaScale,
+                    Is.EqualTo(
+                        DeucarianInputSystemNavigationSettings.DefaultPointerDeltaScale));
 
                 settings.OrbitRotateButton = DeucarianMouseButton.Middle;
                 settings.OrbitDragThreshold = 12f;
+                settings.PointerDeltaScale = 0.25f;
                 settings.ScrollNormalization = 1f;
 
                 Assert.That(
                     settings.OrbitRotateButton,
                     Is.EqualTo(DeucarianMouseButton.Middle));
                 Assert.That(settings.OrbitDragThreshold, Is.EqualTo(12f));
+                Assert.That(settings.PointerDeltaScale, Is.EqualTo(0.25f));
                 Assert.That(settings.ScrollNormalization, Is.EqualTo(1f));
             }
             finally
@@ -98,7 +104,9 @@ namespace Deucarian.CameraNavigation.InputSystemIntegration.Tests
 
                 DeucarianOrbitInputSystemFrame frame = source.ReadFrame();
 
-                Assert.That(frame.NavigationInput.Pan, Is.EqualTo(new Vector2(6f, -2f)));
+                Assert.That(
+                    frame.NavigationInput.Pan,
+                    Is.EqualTo(new Vector2(0.6f, -0.2f)));
                 Assert.That(frame.NavigationInput.Zoom, Is.EqualTo(1f));
                 Assert.That(frame.NavigationInput.Move.y, Is.GreaterThan(0f));
                 Assert.That(frame.NavigationInput.Move.z, Is.GreaterThan(0f));
@@ -118,6 +126,39 @@ namespace Deucarian.CameraNavigation.InputSystemIntegration.Tests
             {
                 Object.DestroyImmediate(sourceObject);
                 Object.DestroyImmediate(blockerObject);
+            }
+        }
+
+        [Test]
+        public void FlyInputSourceAppliesConfiguredPointerDeltaScale()
+        {
+            Mouse mouse = InputSystem.AddDevice<Mouse>();
+            GameObject sourceObject = new GameObject("Fly Input Source");
+            DeucarianInputSystemNavigationSettings settings =
+                ScriptableObject.CreateInstance<DeucarianInputSystemNavigationSettings>();
+            try
+            {
+                settings.PointerDeltaScale = 0.25f;
+                DeucarianFlyInputSystemSource source =
+                    sourceObject.AddComponent<DeucarianFlyInputSystemSource>();
+                source.Settings = settings;
+                InputSystem.QueueStateEvent(
+                    mouse,
+                    new MouseState
+                    {
+                        position = new Vector2(200f, 100f),
+                        delta = new Vector2(8f, -4f)
+                    }.WithButton(MouseButton.Right));
+                InputSystem.Update();
+
+                DeucarianFlyCameraInput input = source.ReadInput();
+
+                Assert.That(input.Look, Is.EqualTo(new Vector2(2f, -1f)));
+            }
+            finally
+            {
+                Object.DestroyImmediate(sourceObject);
+                Object.DestroyImmediate(settings);
             }
         }
 
