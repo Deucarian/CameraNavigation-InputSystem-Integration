@@ -1,0 +1,24 @@
+{
+  "packageId": "com.deucarian.camera-navigation.input-system-integration",
+  "displayName": "Deucarian Camera Navigation Input System Integration",
+  "samplePolicy": "compiled-example",
+  "ownedCapabilities": [],
+  "runtimeAssemblies": [
+    "Deucarian.CameraNavigation.InputSystemIntegration"
+  ],
+  "editorAssemblies": [],
+  "sampleAssemblies": [
+    "Deucarian.CameraNavigation.InputSystemIntegration.Samples.ReadyRig"
+  ],
+  "testAssemblies": [
+    "Deucarian.CameraNavigation.InputSystemIntegration.Tests.EditMode"
+  ],
+  "requiredDependencies": [
+    "com.deucarian.camera-navigation",
+    "com.unity.inputsystem"
+  ],
+  "optionalVersionDefinedDependencies": [],
+  "allowedDirectDebugCalls": [],
+  "allowedDirectUnityObjectLifetimeCalls": [],
+  "expectedSamplesRoot": "Samples~"
+}

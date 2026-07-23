@@ -1,0 +1,34 @@
+{
+  "name": "com.deucarian.camera-navigation.input-system-integration",
+  "version": "0.1.0",
+  "displayName": "Deucarian Camera Navigation Input System Integration",
+  "description": "Ready-to-use Unity Input System adapters and rig for Deucarian Orbit and Fly camera navigation.",
+  "unity": "2022.3",
+  "author": {
+    "name": "Deucarian"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Deucarian/CameraNavigation-InputSystem-Integration.git"
+  },
+  "keywords": [
+    "deucarian",
+    "camera",
+    "navigation",
+    "orbit",
+    "fly",
+    "input-system",
+    "integration"
+  ],
+  "dependencies": {
+    "com.deucarian.camera-navigation": "0.2.0",
+    "com.unity.inputsystem": "1.17.0"
+  },
+  "samples": [
+    {
+      "displayName": "Ready-to-use Navigation Rig",
+      "description": "Compiled example and setup guide for enabling Orbit and Fly navigation on a camera.",
+      "path": "Samples~/Ready-to-use Navigation Rig"
+    }
+  ]
+}

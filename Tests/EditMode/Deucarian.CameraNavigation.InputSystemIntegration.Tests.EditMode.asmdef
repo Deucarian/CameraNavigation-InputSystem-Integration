@@ -1,0 +1,26 @@
+{
+  "name": "Deucarian.CameraNavigation.InputSystemIntegration.Tests.EditMode",
+  "rootNamespace": "Deucarian.CameraNavigation.InputSystemIntegration.Tests",
+  "references": [
+    "Deucarian.CameraNavigation",
+    "Deucarian.CameraNavigation.InputSystemIntegration",
+    "Unity.InputSystem",
+    "Unity.InputSystem.TestFramework"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": false,
+  "defineConstraints": [
+    "UNITY_INCLUDE_TESTS"
+  ],
+  "versionDefines": [],
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ],
+  "noEngineReferences": false
+}

@@ -1,0 +1,16 @@
+{
+  "name": "Deucarian.CameraNavigation.InputSystemIntegration.Samples.ReadyRig",
+  "rootNamespace": "Deucarian.CameraNavigation.InputSystemIntegration.Samples",
+  "references": [
+    "Deucarian.CameraNavigation.InputSystemIntegration"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": false,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}
