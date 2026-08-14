@@ -8,7 +8,7 @@ drives the input-agnostic Deucarian controllers.
 
 Package ID: `com.deucarian.camera-navigation.input-system-integration`
 
-Current package version: `0.1.5`.
+Current package version: `0.1.7`.
 
 ## When to use it
 
@@ -47,6 +47,9 @@ Default controls:
 - `DeucarianInputSystemNavigationSettings`: configurable keys, buttons, thresholds,
   pointer-delta scaling, and scroll normalization.
 - `IDeucarianNavigationInputBlocker`: application/UI input-blocking boundary.
+- `IDeucarianCaptureRequiredActionStateSource`: optional configured-action
+  capability for pointer-capture coordinators; it keeps remapped button
+  knowledge inside this Input System adapter.
 - `DeucarianInputSystemCameraNavigationRig`: complete Orbit/Fly host with pivot raycasting and model-scale reference bounds.
 
 ## Integration boundary

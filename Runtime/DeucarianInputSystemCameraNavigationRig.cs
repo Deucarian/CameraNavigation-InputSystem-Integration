@@ -12,6 +12,7 @@ namespace Deucarian.CameraNavigation.InputSystemIntegration
     [DisallowMultipleComponent]
     [RequireComponent(typeof(DeucarianOrbitInputSystemSource))]
     [RequireComponent(typeof(DeucarianFlyInputSystemSource))]
+    [RequireComponent(typeof(DeucarianInputSystemNavigationActionSource))]
     public sealed class DeucarianInputSystemCameraNavigationRig : MonoBehaviour
     {
         [SerializeField] private Camera navigationCamera;
@@ -31,6 +32,7 @@ namespace Deucarian.CameraNavigation.InputSystemIntegration
             new DeucarianFlyCameraController();
         private DeucarianOrbitInputSystemSource orbitInput;
         private DeucarianFlyInputSystemSource flyInput;
+        private DeucarianInputSystemNavigationActionSource actionStateSource;
         private DeucarianInputSystemNavigationMode synchronizedMode;
         private bool hasSynchronizedMode;
 
@@ -66,6 +68,14 @@ namespace Deucarian.CameraNavigation.InputSystemIntegration
 
         public DeucarianInputSystemNavigationMode Mode => mode;
         public Vector3 OrbitPivot => orbitController.Pivot;
+        public IDeucarianNavigationActionStateSource ActionStateSource
+        {
+            get
+            {
+                ResolveInputSources();
+                return actionStateSource;
+            }
+        }
 
         private void Awake()
         {
@@ -249,6 +259,17 @@ namespace Deucarian.CameraNavigation.InputSystemIntegration
                     flyInput = gameObject.AddComponent<DeucarianFlyInputSystemSource>();
                 }
             }
+
+            if (actionStateSource == null)
+            {
+                actionStateSource =
+                    GetComponent<DeucarianInputSystemNavigationActionSource>();
+                if (actionStateSource == null)
+                {
+                    actionStateSource =
+                        gameObject.AddComponent<DeucarianInputSystemNavigationActionSource>();
+                }
+            }
         }
 
         private void ApplyInputConfiguration()
@@ -256,6 +277,7 @@ namespace Deucarian.CameraNavigation.InputSystemIntegration
             ResolveInputSources();
             orbitInput.Settings = inputSettings;
             flyInput.Settings = inputSettings;
+            actionStateSource.Settings = inputSettings;
             orbitInput.SetInputBlocker(inputBlocker);
             flyInput.SetInputBlocker(inputBlocker);
         }

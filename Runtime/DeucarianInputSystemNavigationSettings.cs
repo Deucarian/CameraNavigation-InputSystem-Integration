@@ -100,22 +100,54 @@ namespace Deucarian.CameraNavigation.InputSystemIntegration
             set => pointerDeltaScale = Mathf.Max(0f, value);
         }
 
-        public Key MoveForward => moveForward;
-        public Key MoveForwardAlternative => moveForwardAlternative;
-        public Key MoveBackward => moveBackward;
-        public Key MoveBackwardAlternative => moveBackwardAlternative;
-        public Key MoveRight => moveRight;
-        public Key MoveRightAlternative => moveRightAlternative;
-        public Key MoveLeft => moveLeft;
-        public Key MoveLeftAlternative => moveLeftAlternative;
-        public Key MoveUp => moveUp;
-        public Key MoveUpAlternative => moveUpAlternative;
-        public Key MoveDown => moveDown;
-        public Key MoveDownAlternative => moveDownAlternative;
-        public Key Boost => boost;
-        public Key BoostAlternative => boostAlternative;
-        public Key Slow => slow;
-        public Key SlowAlternative => slowAlternative;
+        public Key MoveForward { get => moveForward; set => moveForward = value; }
+        public Key MoveForwardAlternative
+        {
+            get => moveForwardAlternative;
+            set => moveForwardAlternative = value;
+        }
+        public Key MoveBackward { get => moveBackward; set => moveBackward = value; }
+        public Key MoveBackwardAlternative
+        {
+            get => moveBackwardAlternative;
+            set => moveBackwardAlternative = value;
+        }
+        public Key MoveRight { get => moveRight; set => moveRight = value; }
+        public Key MoveRightAlternative
+        {
+            get => moveRightAlternative;
+            set => moveRightAlternative = value;
+        }
+        public Key MoveLeft { get => moveLeft; set => moveLeft = value; }
+        public Key MoveLeftAlternative
+        {
+            get => moveLeftAlternative;
+            set => moveLeftAlternative = value;
+        }
+        public Key MoveUp { get => moveUp; set => moveUp = value; }
+        public Key MoveUpAlternative
+        {
+            get => moveUpAlternative;
+            set => moveUpAlternative = value;
+        }
+        public Key MoveDown { get => moveDown; set => moveDown = value; }
+        public Key MoveDownAlternative
+        {
+            get => moveDownAlternative;
+            set => moveDownAlternative = value;
+        }
+        public Key Boost { get => boost; set => boost = value; }
+        public Key BoostAlternative
+        {
+            get => boostAlternative;
+            set => boostAlternative = value;
+        }
+        public Key Slow { get => slow; set => slow = value; }
+        public Key SlowAlternative
+        {
+            get => slowAlternative;
+            set => slowAlternative = value;
+        }
 
         private void OnValidate()
         {
