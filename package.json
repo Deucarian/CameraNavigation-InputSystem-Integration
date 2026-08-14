@@ -1,6 +1,6 @@
 {
   "name": "com.deucarian.camera-navigation.input-system-integration",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "displayName": "Deucarian Camera Navigation Input System Integration",
   "description": "Ready-to-use Unity Input System adapters and rig for Deucarian Orbit and Fly camera navigation.",
   "unity": "2022.3",

@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.6 - 2026-08-14
+
+- Added a configurable navigation-action state source so viewer-level
+  coordination and pointer capture can observe the same remapped Input System
+  controls as the Orbit/Fly adapters without polling raw devices themselves.
+
 ## 0.1.5 - 2026-07-23
 
 - Aligned the exact Camera Navigation dependency with the approved tuned

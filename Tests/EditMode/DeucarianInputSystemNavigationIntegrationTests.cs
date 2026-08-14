@@ -69,10 +69,111 @@ namespace Deucarian.CameraNavigation.InputSystemIntegration.Tests
                 Assert.That(
                     rigObject.GetComponent<DeucarianFlyInputSystemSource>(),
                     Is.Not.Null);
+                Assert.That(
+                    rigObject.GetComponent<DeucarianInputSystemNavigationActionSource>(),
+                    Is.Not.Null);
             }
             finally
             {
                 Object.DestroyImmediate(rigObject);
+            }
+        }
+
+        [Test]
+        public void NavigationActionSourceHonorsRemappedControls()
+        {
+            Mouse mouse = InputSystem.AddDevice<Mouse>();
+            Keyboard keyboard = InputSystem.AddDevice<Keyboard>();
+            GameObject sourceObject = new GameObject("Navigation Action Source");
+            DeucarianInputSystemNavigationSettings settings =
+                ScriptableObject.CreateInstance<DeucarianInputSystemNavigationSettings>();
+            try
+            {
+                settings.OrbitRotateButton = DeucarianMouseButton.Middle;
+                settings.MoveForward = Key.R;
+                settings.MoveForwardAlternative = Key.None;
+                DeucarianInputSystemNavigationActionSource source =
+                    sourceObject.AddComponent<DeucarianInputSystemNavigationActionSource>();
+                source.Settings = settings;
+
+                InputSystem.QueueStateEvent(
+                    mouse,
+                    new MouseState { position = new Vector2(20f, 30f) }
+                        .WithButton(MouseButton.Middle));
+                InputSystem.QueueStateEvent(keyboard, new KeyboardState(Key.R));
+                InputSystem.Update();
+
+                DeucarianNavigationActionState state = source.ReadActionState(
+                    DeucarianInputSystemNavigationMode.Orbit,
+                    false);
+
+                Assert.IsTrue(state.HasPointerAction);
+                Assert.IsTrue(state.HasKeyboardAction);
+                Assert.IsTrue(state.CaptureRequested);
+                Assert.That(
+                    state.CaptureButton,
+                    Is.EqualTo(DeucarianMouseButton.Middle));
+                Assert.IsTrue(source.IsButtonPressed(DeucarianMouseButton.Middle));
+                Assert.IsFalse(state.IsNeutral);
+            }
+            finally
+            {
+                Object.DestroyImmediate(sourceObject);
+                Object.DestroyImmediate(settings);
+            }
+        }
+
+        [Test]
+        public void NavigationActionSourceIgnoresUnmappedControls()
+        {
+            Mouse mouse = InputSystem.AddDevice<Mouse>();
+            Keyboard keyboard = InputSystem.AddDevice<Keyboard>();
+            GameObject sourceObject = new GameObject("Unmapped Action Source");
+            DeucarianInputSystemNavigationSettings settings =
+                ScriptableObject.CreateInstance<DeucarianInputSystemNavigationSettings>();
+            try
+            {
+                settings.OrbitRotateButton = DeucarianMouseButton.Middle;
+                settings.OrbitPanButton = DeucarianMouseButton.Middle;
+                settings.OrbitPivotButton = DeucarianMouseButton.Middle;
+                settings.MoveForward = Key.R;
+                settings.MoveForwardAlternative = Key.None;
+                settings.MoveBackward = Key.None;
+                settings.MoveBackwardAlternative = Key.None;
+                settings.MoveRight = Key.None;
+                settings.MoveRightAlternative = Key.None;
+                settings.MoveLeft = Key.None;
+                settings.MoveLeftAlternative = Key.None;
+                settings.MoveUp = Key.None;
+                settings.MoveUpAlternative = Key.None;
+                settings.MoveDown = Key.None;
+                settings.MoveDownAlternative = Key.None;
+                settings.Boost = Key.None;
+                settings.BoostAlternative = Key.None;
+                settings.Slow = Key.None;
+                settings.SlowAlternative = Key.None;
+                DeucarianInputSystemNavigationActionSource source =
+                    sourceObject.AddComponent<DeucarianInputSystemNavigationActionSource>();
+                source.Settings = settings;
+
+                InputSystem.QueueStateEvent(
+                    mouse,
+                    new MouseState().WithButton(MouseButton.Left));
+                InputSystem.QueueStateEvent(keyboard, new KeyboardState(Key.W));
+                InputSystem.Update();
+
+                DeucarianNavigationActionState state = source.ReadActionState(
+                    DeucarianInputSystemNavigationMode.Orbit,
+                    false);
+
+                Assert.IsFalse(state.HasNewNavigationAction);
+                Assert.IsTrue(state.IsNeutral);
+                Assert.IsFalse(state.CaptureRequested);
+            }
+            finally
+            {
+                Object.DestroyImmediate(sourceObject);
+                Object.DestroyImmediate(settings);
             }
         }
 
