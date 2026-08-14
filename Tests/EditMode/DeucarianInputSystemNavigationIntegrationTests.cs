@@ -114,6 +114,10 @@ namespace Deucarian.CameraNavigation.InputSystemIntegration.Tests
                     state.CaptureButton,
                     Is.EqualTo(DeucarianMouseButton.Middle));
                 Assert.IsTrue(source.IsButtonPressed(DeucarianMouseButton.Middle));
+                Assert.IsTrue(
+                    source.IsCaptureRequiredPointerActionPressed(
+                        DeucarianInputSystemNavigationMode.Orbit,
+                        false));
                 Assert.IsFalse(state.IsNeutral);
             }
             finally
@@ -169,6 +173,10 @@ namespace Deucarian.CameraNavigation.InputSystemIntegration.Tests
                 Assert.IsFalse(state.HasNewNavigationAction);
                 Assert.IsTrue(state.IsNeutral);
                 Assert.IsFalse(state.CaptureRequested);
+                Assert.IsFalse(
+                    source.IsCaptureRequiredPointerActionPressed(
+                        DeucarianInputSystemNavigationMode.Orbit,
+                        false));
             }
             finally
             {

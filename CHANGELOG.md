@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.7 - 2026-08-14
+
+- Added an additive configured-action capability that lets viewer-level
+  pointer-capture coordination distinguish drag actions from scrolling and
+  other pointer actions without polling raw Input System devices.
+
 ## 0.1.6 - 2026-08-14
 
 - Added a configurable navigation-action state source so viewer-level

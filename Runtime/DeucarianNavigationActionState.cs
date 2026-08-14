@@ -62,4 +62,16 @@ namespace Deucarian.CameraNavigation.InputSystemIntegration
 
         bool IsOrbitRotatePressed();
     }
+
+    /// <summary>
+    /// Optional capability for coordinators that must distinguish pointer
+    /// gestures requiring an accepted pointer-capture session from pointer
+    /// actions such as scrolling or pivot selection.
+    /// </summary>
+    public interface IDeucarianCaptureRequiredActionStateSource
+    {
+        bool IsCaptureRequiredPointerActionPressed(
+            DeucarianInputSystemNavigationMode mode,
+            bool isTopDown);
+    }
 }

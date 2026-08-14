@@ -7,7 +7,8 @@ namespace Deucarian.CameraNavigation.InputSystemIntegration
     [DisallowMultipleComponent]
     public sealed class DeucarianInputSystemNavigationActionSource :
         MonoBehaviour,
-        IDeucarianNavigationActionStateSource
+        IDeucarianNavigationActionStateSource,
+        IDeucarianCaptureRequiredActionStateSource
     {
         [SerializeField] private DeucarianInputSystemNavigationSettings settings;
 
@@ -60,6 +61,19 @@ namespace Deucarian.CameraNavigation.InputSystemIntegration
         public bool IsOrbitRotatePressed()
         {
             return IsButtonPressed(GetOrbitRotateButton());
+        }
+
+        public bool IsCaptureRequiredPointerActionPressed(
+            DeucarianInputSystemNavigationMode mode,
+            bool isTopDown)
+        {
+            if (mode == DeucarianInputSystemNavigationMode.Fly)
+            {
+                return IsButtonPressed(GetFlyLookButton());
+            }
+
+            return IsButtonPressed(GetOrbitPanButton()) ||
+                   (!isTopDown && IsButtonPressed(GetOrbitRotateButton()));
         }
 
         private bool TryGetPointerAction(
