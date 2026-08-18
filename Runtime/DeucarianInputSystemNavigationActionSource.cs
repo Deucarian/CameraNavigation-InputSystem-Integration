@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Controls;
+using UnityEngine.InputSystem.LowLevel;
 
 namespace Deucarian.CameraNavigation.InputSystemIntegration
 {
@@ -12,10 +13,25 @@ namespace Deucarian.CameraNavigation.InputSystemIntegration
     {
         [SerializeField] private DeucarianInputSystemNavigationSettings settings;
 
+        private bool orbitRotateGesturePending;
+        private bool orbitRotateDragActive;
+        private Vector2 orbitRotateStartPosition;
+        private DeucarianMouseButton trackedOrbitRotateButton;
+        private uint orbitRotateCaptureRequestUpdateCount;
+
         public DeucarianInputSystemNavigationSettings Settings
         {
             get => settings;
-            set => settings = value;
+            set
+            {
+                if (settings == value)
+                {
+                    return;
+                }
+
+                settings = value;
+                ResetOrbitRotateGesture();
+            }
         }
 
         public DeucarianNavigationActionState ReadActionState(
@@ -33,6 +49,15 @@ namespace Deucarian.CameraNavigation.InputSystemIntegration
                 isTopDown,
                 out bool captureRequested,
                 out DeucarianMouseButton captureButton);
+            if (IsOrbitRotateCaptureRequest(
+                    captureRequested,
+                    captureButton))
+            {
+                // UI blocking must be evaluated where the gesture began. The
+                // current pointer may already have crossed out of a UI region.
+                pointerPosition = orbitRotateStartPosition;
+            }
+
             bool keyboardStarted = AnyConfiguredKeyWasPressed(keyboard);
             DeucarianNavigationActionKinds startedActions =
                 (pointerStarted
@@ -72,8 +97,16 @@ namespace Deucarian.CameraNavigation.InputSystemIntegration
                 return IsButtonPressed(GetFlyLookButton());
             }
 
-            return IsButtonPressed(GetOrbitPanButton()) ||
-                   (!isTopDown && IsButtonPressed(GetOrbitRotateButton()));
+            DeucarianMouseButton rotateButton = GetOrbitRotateButton();
+            DeucarianMouseButton panButton = GetOrbitPanButton();
+            bool panPressed = IsButtonPressed(panButton) &&
+                              (isTopDown || panButton != rotateButton);
+            bool rotateDragPressed =
+                !isTopDown &&
+                orbitRotateDragActive &&
+                trackedOrbitRotateButton == rotateButton &&
+                IsButtonPressed(rotateButton);
+            return panPressed || rotateDragPressed;
         }
 
         private bool TryGetPointerAction(
@@ -93,6 +126,7 @@ namespace Deucarian.CameraNavigation.InputSystemIntegration
             bool scrollStarted = Mathf.Abs(mouse.scroll.ReadValue().y) > 0.0001f;
             if (mode == DeucarianInputSystemNavigationMode.Fly)
             {
+                ResetOrbitRotateGesture();
                 DeucarianMouseButton lookButton = GetFlyLookButton();
                 bool lookStarted = WasPressed(mouse, lookButton);
                 captureRequested = lookStarted;
@@ -100,15 +134,27 @@ namespace Deucarian.CameraNavigation.InputSystemIntegration
                 return lookStarted || scrollStarted;
             }
 
+            DeucarianMouseButton rotateButton = GetOrbitRotateButton();
+            bool rotatePressedThisFrame =
+                !isTopDown && WasPressed(mouse, rotateButton);
+            bool rotateDragStarted = UpdateOrbitRotateGesture(
+                mouse,
+                rotateButton,
+                !isTopDown);
             DeucarianMouseButton panButton = GetOrbitPanButton();
-            bool panStarted = WasPressed(mouse, panButton);
-            bool pivotStarted = WasPressed(mouse, GetOrbitPivotButton());
-            bool rotateStarted =
-                !isTopDown && WasPressed(mouse, GetOrbitRotateButton());
-            if (rotateStarted)
+            bool rotateOwnsPanPress =
+                rotatePressedThisFrame && panButton == rotateButton;
+            bool panStarted =
+                !rotateOwnsPanPress && WasPressed(mouse, panButton);
+            DeucarianMouseButton pivotButton = GetOrbitPivotButton();
+            bool rotateOwnsPivotPress =
+                rotatePressedThisFrame && pivotButton == rotateButton;
+            bool pivotStarted =
+                !rotateOwnsPivotPress && WasPressed(mouse, pivotButton);
+            if (rotateDragStarted)
             {
                 captureRequested = true;
-                captureButton = GetOrbitRotateButton();
+                captureButton = rotateButton;
             }
             else if (panStarted)
             {
@@ -116,7 +162,95 @@ namespace Deucarian.CameraNavigation.InputSystemIntegration
                 captureButton = panButton;
             }
 
-            return rotateStarted || panStarted || pivotStarted || scrollStarted;
+            return rotateDragStarted || panStarted || pivotStarted || scrollStarted;
+        }
+
+        private bool UpdateOrbitRotateGesture(
+            Mouse mouse,
+            DeucarianMouseButton rotateButton,
+            bool enabled)
+        {
+            if (!enabled || mouse == null)
+            {
+                ResetOrbitRotateGesture();
+                return false;
+            }
+
+            if (orbitRotateGesturePending &&
+                trackedOrbitRotateButton != rotateButton)
+            {
+                ResetOrbitRotateGesture();
+            }
+
+            ButtonControl rotateControl =
+                DeucarianInputSystemDeviceUtility.GetMouseButton(
+                    mouse,
+                    rotateButton);
+            if (rotateControl == null || !rotateControl.isPressed)
+            {
+                ResetOrbitRotateGesture();
+                return false;
+            }
+
+            if (rotateControl.wasPressedThisFrame)
+            {
+                orbitRotateGesturePending = true;
+                orbitRotateDragActive = false;
+                orbitRotateStartPosition = mouse.position.ReadValue();
+                trackedOrbitRotateButton = rotateButton;
+                orbitRotateCaptureRequestUpdateCount = default;
+            }
+
+            if (!orbitRotateGesturePending)
+            {
+                return false;
+            }
+
+            if (orbitRotateDragActive)
+            {
+                return orbitRotateCaptureRequestUpdateCount ==
+                       InputState.updateCount;
+            }
+
+            float threshold = settings != null
+                ? settings.OrbitDragThreshold
+                : DeucarianInputSystemNavigationSettings
+                    .DefaultOrbitDragThreshold;
+            if (Vector2.Distance(
+                    orbitRotateStartPosition,
+                    mouse.position.ReadValue()) < threshold)
+            {
+                return false;
+            }
+
+            orbitRotateDragActive = true;
+            orbitRotateCaptureRequestUpdateCount = InputState.updateCount;
+            return true;
+        }
+
+        private bool IsOrbitRotateCaptureRequest(
+            bool captureRequested,
+            DeucarianMouseButton captureButton)
+        {
+            return captureRequested &&
+                   orbitRotateDragActive &&
+                   orbitRotateCaptureRequestUpdateCount ==
+                       InputState.updateCount &&
+                   captureButton == trackedOrbitRotateButton;
+        }
+
+        private void OnDisable()
+        {
+            ResetOrbitRotateGesture();
+        }
+
+        private void ResetOrbitRotateGesture()
+        {
+            orbitRotateGesturePending = false;
+            orbitRotateDragActive = false;
+            orbitRotateStartPosition = default;
+            trackedOrbitRotateButton = default;
+            orbitRotateCaptureRequestUpdateCount = default;
         }
 
         private bool AnyConfiguredKeyWasPressed(Keyboard keyboard)
