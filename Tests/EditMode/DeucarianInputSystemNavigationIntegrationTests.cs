@@ -90,6 +90,7 @@ namespace Deucarian.CameraNavigation.InputSystemIntegration.Tests
             try
             {
                 settings.OrbitRotateButton = DeucarianMouseButton.Middle;
+                settings.OrbitDragThreshold = 0f;
                 settings.MoveForward = Key.R;
                 settings.MoveForwardAlternative = Key.None;
                 DeucarianInputSystemNavigationActionSource source =
@@ -119,6 +120,430 @@ namespace Deucarian.CameraNavigation.InputSystemIntegration.Tests
                         DeucarianInputSystemNavigationMode.Orbit,
                         false));
                 Assert.IsFalse(state.IsNeutral);
+            }
+            finally
+            {
+                Object.DestroyImmediate(sourceObject);
+                Object.DestroyImmediate(settings);
+            }
+        }
+
+        [Test]
+        public void OrbitRotateClickBelowThresholdDoesNotRequestCapture()
+        {
+            Mouse mouse = InputSystem.AddDevice<Mouse>();
+            GameObject sourceObject = new GameObject(
+                "Orbit Click Action Source");
+            DeucarianInputSystemNavigationSettings settings =
+                ScriptableObject.CreateInstance<
+                    DeucarianInputSystemNavigationSettings>();
+            try
+            {
+                settings.OrbitDragThreshold = 25f;
+                DeucarianInputSystemNavigationActionSource source =
+                    sourceObject.AddComponent<
+                        DeucarianInputSystemNavigationActionSource>();
+                source.Settings = settings;
+
+                InputSystem.QueueStateEvent(
+                    mouse,
+                    new MouseState
+                    {
+                        position = new Vector2(100f, 100f)
+                    }.WithButton(MouseButton.Left));
+                InputSystem.Update();
+
+                DeucarianNavigationActionState pressed =
+                    source.ReadActionState(
+                        DeucarianInputSystemNavigationMode.Orbit,
+                        false);
+
+                Assert.IsFalse(pressed.HasPointerAction);
+                Assert.IsFalse(pressed.CaptureRequested);
+                Assert.IsFalse(
+                    source.IsCaptureRequiredPointerActionPressed(
+                        DeucarianInputSystemNavigationMode.Orbit,
+                        false));
+
+                InputSystem.QueueStateEvent(
+                    mouse,
+                    new MouseState
+                    {
+                        position = new Vector2(112f, 110f)
+                    }.WithButton(MouseButton.Left));
+                InputSystem.Update();
+
+                DeucarianNavigationActionState moved =
+                    source.ReadActionState(
+                        DeucarianInputSystemNavigationMode.Orbit,
+                        false);
+
+                Assert.IsFalse(moved.HasPointerAction);
+                Assert.IsFalse(moved.CaptureRequested);
+                Assert.IsFalse(
+                    source.IsCaptureRequiredPointerActionPressed(
+                        DeucarianInputSystemNavigationMode.Orbit,
+                        false));
+
+                InputSystem.QueueStateEvent(
+                    mouse,
+                    new MouseState
+                    {
+                        position = new Vector2(112f, 110f)
+                    });
+                InputSystem.Update();
+
+                DeucarianNavigationActionState released =
+                    source.ReadActionState(
+                        DeucarianInputSystemNavigationMode.Orbit,
+                        false);
+
+                Assert.IsFalse(released.HasPointerAction);
+                Assert.IsFalse(released.CaptureRequested);
+                Assert.IsTrue(released.IsNeutral);
+            }
+            finally
+            {
+                Object.DestroyImmediate(sourceObject);
+                Object.DestroyImmediate(settings);
+            }
+        }
+
+        [Test]
+        public void OrbitRotateDragRequestsCaptureOnlyAfterThreshold()
+        {
+            Mouse mouse = InputSystem.AddDevice<Mouse>();
+            GameObject sourceObject = new GameObject(
+                "Orbit Drag Action Source");
+            DeucarianInputSystemNavigationSettings settings =
+                ScriptableObject.CreateInstance<
+                    DeucarianInputSystemNavigationSettings>();
+            try
+            {
+                settings.OrbitDragThreshold = 25f;
+                DeucarianInputSystemNavigationActionSource source =
+                    sourceObject.AddComponent<
+                        DeucarianInputSystemNavigationActionSource>();
+                source.Settings = settings;
+
+                InputSystem.QueueStateEvent(
+                    mouse,
+                    new MouseState
+                    {
+                        position = new Vector2(100f, 100f)
+                    }.WithButton(MouseButton.Left));
+                InputSystem.Update();
+                DeucarianNavigationActionState pressed =
+                    source.ReadActionState(
+                        DeucarianInputSystemNavigationMode.Orbit,
+                        false);
+
+                Assert.IsFalse(pressed.CaptureRequested);
+
+                InputSystem.QueueStateEvent(
+                    mouse,
+                    new MouseState
+                    {
+                        position = new Vector2(130f, 100f),
+                        delta = new Vector2(30f, 0f)
+                    }.WithButton(MouseButton.Left));
+                InputSystem.Update();
+
+                DeucarianNavigationActionState thresholdCrossed =
+                    source.ReadActionState(
+                        DeucarianInputSystemNavigationMode.Orbit,
+                        false);
+
+                Assert.IsTrue(thresholdCrossed.HasPointerAction);
+                Assert.IsTrue(thresholdCrossed.CaptureRequested);
+                Assert.That(
+                    thresholdCrossed.CaptureButton,
+                    Is.EqualTo(DeucarianMouseButton.Left));
+                Assert.That(
+                    thresholdCrossed.PointerPosition,
+                    Is.EqualTo(new Vector2(100f, 100f)));
+                Assert.IsTrue(
+                    source.IsCaptureRequiredPointerActionPressed(
+                        DeucarianInputSystemNavigationMode.Orbit,
+                        false));
+
+                DeucarianNavigationActionState repeatedRead =
+                    source.ReadActionState(
+                        DeucarianInputSystemNavigationMode.Orbit,
+                        false);
+
+                Assert.IsTrue(repeatedRead.HasPointerAction);
+                Assert.IsTrue(repeatedRead.CaptureRequested);
+                Assert.That(
+                    repeatedRead.CaptureButton,
+                    Is.EqualTo(DeucarianMouseButton.Left));
+                Assert.That(
+                    repeatedRead.PointerPosition,
+                    Is.EqualTo(new Vector2(100f, 100f)));
+
+                InputSystem.QueueStateEvent(
+                    mouse,
+                    new MouseState
+                    {
+                        position = new Vector2(140f, 100f),
+                        delta = new Vector2(10f, 0f)
+                    }.WithButton(MouseButton.Left));
+                InputSystem.Update();
+
+                DeucarianNavigationActionState held =
+                    source.ReadActionState(
+                        DeucarianInputSystemNavigationMode.Orbit,
+                        false);
+
+                Assert.IsFalse(held.HasPointerAction);
+                Assert.IsFalse(held.CaptureRequested);
+                Assert.IsTrue(
+                    source.IsCaptureRequiredPointerActionPressed(
+                        DeucarianInputSystemNavigationMode.Orbit,
+                        false));
+
+                InputSystem.QueueStateEvent(
+                    mouse,
+                    new MouseState
+                    {
+                        position = new Vector2(140f, 100f)
+                    });
+                InputSystem.Update();
+
+                source.ReadActionState(
+                    DeucarianInputSystemNavigationMode.Orbit,
+                    false);
+                Assert.IsFalse(
+                    source.IsCaptureRequiredPointerActionPressed(
+                        DeucarianInputSystemNavigationMode.Orbit,
+                        false));
+            }
+            finally
+            {
+                Object.DestroyImmediate(sourceObject);
+                Object.DestroyImmediate(settings);
+            }
+        }
+
+        [Test]
+        public void OrbitPanAndFlyLookStillRequestCaptureImmediately()
+        {
+            Mouse mouse = InputSystem.AddDevice<Mouse>();
+            GameObject sourceObject = new GameObject(
+                "Immediate Capture Action Source");
+            try
+            {
+                DeucarianInputSystemNavigationActionSource source =
+                    sourceObject.AddComponent<
+                        DeucarianInputSystemNavigationActionSource>();
+
+                InputSystem.QueueStateEvent(
+                    mouse,
+                    new MouseState().WithButton(MouseButton.Right));
+                InputSystem.Update();
+
+                DeucarianNavigationActionState pan = source.ReadActionState(
+                    DeucarianInputSystemNavigationMode.Orbit,
+                    false);
+
+                Assert.IsTrue(pan.HasPointerAction);
+                Assert.IsTrue(pan.CaptureRequested);
+                Assert.That(
+                    pan.CaptureButton,
+                    Is.EqualTo(DeucarianMouseButton.Right));
+
+                InputSystem.QueueStateEvent(mouse, new MouseState());
+                InputSystem.Update();
+                source.ReadActionState(
+                    DeucarianInputSystemNavigationMode.Orbit,
+                    false);
+
+                InputSystem.QueueStateEvent(
+                    mouse,
+                    new MouseState().WithButton(MouseButton.Right));
+                InputSystem.Update();
+
+                DeucarianNavigationActionState flyLook =
+                    source.ReadActionState(
+                        DeucarianInputSystemNavigationMode.Fly,
+                        false);
+
+                Assert.IsTrue(flyLook.HasPointerAction);
+                Assert.IsTrue(flyLook.CaptureRequested);
+                Assert.That(
+                    flyLook.CaptureButton,
+                    Is.EqualTo(DeucarianMouseButton.Right));
+            }
+            finally
+            {
+                Object.DestroyImmediate(sourceObject);
+            }
+        }
+
+        [Test]
+        public void TopDownOrbitDoesNotStartRotateCapture()
+        {
+            Mouse mouse = InputSystem.AddDevice<Mouse>();
+            GameObject sourceObject = new GameObject(
+                "Top Down Action Source");
+            DeucarianInputSystemNavigationSettings settings =
+                ScriptableObject.CreateInstance<
+                    DeucarianInputSystemNavigationSettings>();
+            try
+            {
+                settings.OrbitDragThreshold = 0f;
+                DeucarianInputSystemNavigationActionSource source =
+                    sourceObject.AddComponent<
+                        DeucarianInputSystemNavigationActionSource>();
+                source.Settings = settings;
+
+                InputSystem.QueueStateEvent(
+                    mouse,
+                    new MouseState().WithButton(MouseButton.Left));
+                InputSystem.Update();
+
+                DeucarianNavigationActionState state =
+                    source.ReadActionState(
+                        DeucarianInputSystemNavigationMode.Orbit,
+                        true);
+
+                Assert.IsFalse(state.HasPointerAction);
+                Assert.IsFalse(state.CaptureRequested);
+                Assert.IsFalse(
+                    source.IsCaptureRequiredPointerActionPressed(
+                        DeucarianInputSystemNavigationMode.Orbit,
+                        true));
+            }
+            finally
+            {
+                Object.DestroyImmediate(sourceObject);
+                Object.DestroyImmediate(settings);
+            }
+        }
+
+        [Test]
+        public void SwitchingModesCancelsPendingOrbitRotateGesture()
+        {
+            Mouse mouse = InputSystem.AddDevice<Mouse>();
+            GameObject sourceObject = new GameObject(
+                "Mode Switch Action Source");
+            DeucarianInputSystemNavigationSettings settings =
+                ScriptableObject.CreateInstance<
+                    DeucarianInputSystemNavigationSettings>();
+            try
+            {
+                settings.OrbitDragThreshold = 25f;
+                DeucarianInputSystemNavigationActionSource source =
+                    sourceObject.AddComponent<
+                        DeucarianInputSystemNavigationActionSource>();
+                source.Settings = settings;
+
+                InputSystem.QueueStateEvent(
+                    mouse,
+                    new MouseState
+                    {
+                        position = new Vector2(10f, 10f)
+                    }.WithButton(MouseButton.Left));
+                InputSystem.Update();
+                source.ReadActionState(
+                    DeucarianInputSystemNavigationMode.Orbit,
+                    false);
+
+                source.ReadActionState(
+                    DeucarianInputSystemNavigationMode.Fly,
+                    false);
+                InputSystem.QueueStateEvent(
+                    mouse,
+                    new MouseState
+                    {
+                        position = new Vector2(100f, 10f)
+                    }.WithButton(MouseButton.Left));
+                InputSystem.Update();
+
+                DeucarianNavigationActionState returnedToOrbit =
+                    source.ReadActionState(
+                        DeucarianInputSystemNavigationMode.Orbit,
+                        false);
+
+                Assert.IsFalse(returnedToOrbit.HasPointerAction);
+                Assert.IsFalse(returnedToOrbit.CaptureRequested);
+                Assert.IsFalse(
+                    source.IsCaptureRequiredPointerActionPressed(
+                        DeucarianInputSystemNavigationMode.Orbit,
+                        false));
+            }
+            finally
+            {
+                Object.DestroyImmediate(sourceObject);
+                Object.DestroyImmediate(settings);
+            }
+        }
+
+        [Test]
+        public void RepressStartsOrbitThresholdFromNewPressPosition()
+        {
+            Mouse mouse = InputSystem.AddDevice<Mouse>();
+            GameObject sourceObject = new GameObject(
+                "Orbit Repress Action Source");
+            DeucarianInputSystemNavigationSettings settings =
+                ScriptableObject.CreateInstance<
+                    DeucarianInputSystemNavigationSettings>();
+            try
+            {
+                settings.OrbitDragThreshold = 25f;
+                DeucarianInputSystemNavigationActionSource source =
+                    sourceObject.AddComponent<
+                        DeucarianInputSystemNavigationActionSource>();
+                source.Settings = settings;
+
+                InputSystem.QueueStateEvent(
+                    mouse,
+                    new MouseState
+                    {
+                        position = Vector2.zero
+                    }.WithButton(MouseButton.Left));
+                InputSystem.Update();
+                source.ReadActionState(
+                    DeucarianInputSystemNavigationMode.Orbit,
+                    false);
+
+                // Deliberately do not read the release update. A new press must
+                // still replace the old gesture origin.
+                InputSystem.QueueStateEvent(mouse, new MouseState());
+                InputSystem.Update();
+                InputSystem.QueueStateEvent(
+                    mouse,
+                    new MouseState
+                    {
+                        position = new Vector2(100f, 100f)
+                    }.WithButton(MouseButton.Left));
+                InputSystem.Update();
+
+                DeucarianNavigationActionState repressed =
+                    source.ReadActionState(
+                        DeucarianInputSystemNavigationMode.Orbit,
+                        false);
+
+                Assert.IsFalse(repressed.HasPointerAction);
+                Assert.IsFalse(repressed.CaptureRequested);
+
+                InputSystem.QueueStateEvent(
+                    mouse,
+                    new MouseState
+                    {
+                        position = new Vector2(130f, 100f)
+                    }.WithButton(MouseButton.Left));
+                InputSystem.Update();
+
+                DeucarianNavigationActionState dragged =
+                    source.ReadActionState(
+                        DeucarianInputSystemNavigationMode.Orbit,
+                        false);
+
+                Assert.IsTrue(dragged.CaptureRequested);
+                Assert.That(
+                    dragged.PointerPosition,
+                    Is.EqualTo(new Vector2(100f, 100f)));
             }
             finally
             {
