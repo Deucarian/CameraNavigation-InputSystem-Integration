@@ -1,0 +1,7 @@
+{
+  "name": "Deucarian.CameraNavigation.InputSystemIntegration.Editor",
+  "rootNamespace": "Deucarian.CameraNavigation.InputSystemIntegration.Editor",
+  "references": ["Unity.InputSystem"],
+  "includePlatforms": ["Editor"],
+  "autoReferenced": true
+}

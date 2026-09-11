@@ -1,5 +1,10 @@
 # Changelog
 
+## [Unreleased]
+
+- Keep Active Input Handling set to Both through the Input System editor settings adapter, including Unity 6 Build Profile handling. Only missing backends are enabled; no restart or scene close is forced.
+- Add editor policy and installed-adapter regression tests.
+
 ## 0.1.7 - 2026-08-14
 
 - Added an additive configured-action capability that lets viewer-level

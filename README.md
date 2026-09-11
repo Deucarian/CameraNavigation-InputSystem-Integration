@@ -29,7 +29,7 @@ Deucarian Package Installer. The integration also installs Unity Input System.
 
 ## Quick start
 
-1. Enable Unity's Input System or `Both` under Active Input Handling.
+1. The integration automatically keeps Active Input Handling set to `Both`. Restart the editor once if the native Input System backend was previously disabled; the package never forces a restart or closes scenes.
 2. Add `Deucarian Input System Camera Navigation Rig` to a GameObject.
 3. Assign a camera, or tag the intended camera as `MainCamera`.
 4. Optionally assign navigation controls and input settings assets.

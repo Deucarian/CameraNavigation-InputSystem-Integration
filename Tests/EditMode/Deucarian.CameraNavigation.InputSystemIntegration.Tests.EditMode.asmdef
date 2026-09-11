@@ -4,6 +4,7 @@
   "references": [
     "Deucarian.CameraNavigation",
     "Deucarian.CameraNavigation.InputSystemIntegration",
+    "Deucarian.CameraNavigation.InputSystemIntegration.Editor",
     "Unity.InputSystem",
     "Unity.InputSystem.TestFramework"
   ],
