@@ -6,7 +6,7 @@
   "runtimeAssemblies": [
     "Deucarian.CameraNavigation.InputSystemIntegration"
   ],
-  "editorAssemblies": [],
+  "editorAssemblies": ["Deucarian.CameraNavigation.InputSystemIntegration.Editor"],
   "sampleAssemblies": [
     "Deucarian.CameraNavigation.InputSystemIntegration.Samples.ReadyRig"
   ],
