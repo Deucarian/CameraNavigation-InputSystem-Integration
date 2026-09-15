@@ -53,3 +53,5 @@ python C:/Repositories/Package-Registry/Tools/deucarian_package_validator.py --r
 - Do not guess dependency versions.
 - Keep Package Registry, Package Installer, and Bootstrap catalogs aligned when registered.
 - Keep the core Camera Navigation package input-agnostic.
+- The editor-only backend policy keeps Active Input Handling on Both while this adapter is installed. It never forces an editor restart or disables a backend.
+- Its exact reflection boundary targets Unity Input System's EditorPlayerSettingHelpers (newSystemBackendsEnabled/oldSystemBackendsEnabled), so Unity 6 active Build Profile settings use the owning package's adapter. Do not copy its private Build Profile reflection or move this policy into player code.
