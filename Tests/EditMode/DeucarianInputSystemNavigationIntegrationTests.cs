@@ -11,6 +11,41 @@ namespace Deucarian.CameraNavigation.InputSystemIntegration.Tests
     {
         private const float Tolerance = 0.0001f;
 
+        [TestCase(false)]
+        [TestCase(true)]
+        public void FlyLookWaitsForCaptureWithoutLatchingAnAcceptedGesture(bool gestureRejected)
+        {
+            Mouse mouse = InputSystem.AddDevice<Mouse>();
+            var root = new GameObject("Fly capture delay");
+            try
+            {
+                var camera = root.AddComponent<Camera>();
+                var source = root.AddComponent<DeucarianFlyInputSystemSource>();
+                var blocker = root.AddComponent<TestNavigationInputBlocker>();
+                blocker.BlockPointer = true;
+                blocker.BlockGestureStart = gestureRejected;
+                source.SetInputBlocker(blocker);
+                InputSystem.QueueStateEvent(mouse,
+                    new MouseState { delta = new Vector2(8f, 4f) }.WithButton(MouseButton.Right));
+                InputSystem.Update();
+                Assert.That(source.ReadInput().Look, Is.EqualTo(Vector2.zero));
+
+                blocker.BlockPointer = false;
+                InputSystem.QueueStateEvent(mouse,
+                    new MouseState { delta = new Vector2(8f, 4f) }.WithButton(MouseButton.Right));
+                InputSystem.Update();
+                var input = source.ReadInput();
+                new DeucarianFlyCameraController().Apply(camera, input, 1f / 60f, null);
+                Assert.That(input.Look.sqrMagnitude > 0f, Is.EqualTo(!gestureRejected));
+                Assert.That(Quaternion.Angle(Quaternion.identity, camera.transform.rotation) > 0f,
+                    Is.EqualTo(!gestureRejected));
+            }
+            finally
+            {
+                Object.DestroyImmediate(root);
+            }
+        }
+
         [Test]
         public void InputSettingsExposeReadyToUseDefaultsAndConfiguration()
         {
@@ -894,10 +929,17 @@ namespace Deucarian.CameraNavigation.InputSystemIntegration.Tests
 
     internal sealed class TestNavigationInputBlocker :
         MonoBehaviour,
-        IDeucarianNavigationInputBlocker
+        IDeucarianNavigationInputBlocker,
+        IDeucarianNavigationGestureStartBlocker
     {
         internal bool BlockPointer { get; set; }
         internal bool BlockKeyboard { get; set; }
+        internal bool? BlockGestureStart { get; set; }
+
+        public bool IsPointerGestureStartBlocked(Vector2 screenPosition)
+        {
+            return BlockGestureStart ?? BlockPointer;
+        }
 
         public bool IsPointerInputBlocked(Vector2 screenPosition)
         {

@@ -42,7 +42,10 @@ namespace Deucarian.CameraNavigation.InputSystemIntegration
 
             if (lookButton != null && lookButton.wasPressedThisFrame)
             {
-                lookDragBlocked = pointerBlocked;
+                lookDragBlocked = inputBlocker is
+                    IDeucarianNavigationGestureStartBlocker gestureBlocker
+                    ? gestureBlocker.IsPointerGestureStartBlocked(pointerPosition)
+                    : pointerBlocked;
             }
 
             if (lookButton != null && lookButton.wasReleasedThisFrame)
