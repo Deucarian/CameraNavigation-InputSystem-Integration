@@ -91,6 +91,42 @@ namespace Deucarian.CameraNavigation.InputSystemIntegration.Tests
         }
 
         [Test]
+        public void ViewFocusUsesTheVisibleSurfaceWithoutChangingTheCameraPose()
+        {
+            var root = new GameObject("View focus");
+            var surface = new GameObject("Focus surface");
+            try
+            {
+                var camera = root.AddComponent<Camera>();
+                camera.transform.SetPositionAndRotation(new Vector3(31f, 17f, -26f), Quaternion.Euler(10f, 70f, 0f));
+                var rig = root.AddComponent<DeucarianInputSystemCameraNavigationRig>();
+                rig.NavigationCamera = camera;
+                surface.transform.SetPositionAndRotation(camera.transform.position + camera.transform.forward * 10f,
+                    camera.transform.rotation);
+                surface.AddComponent<BoxCollider>();
+                Physics.SyncTransforms();
+                Vector3 position = camera.transform.position;
+                Quaternion rotation = camera.transform.rotation;
+                rig.SelectOrbitPivotFromView();
+                Assert.That(Vector3.Distance(rig.OrbitPivot, position + camera.transform.forward * 9.5f), Is.LessThan(0.001f));
+                Assert.That(camera.transform.position, Is.EqualTo(position));
+                Assert.That(camera.transform.rotation, Is.EqualTo(rotation));
+
+                surface.transform.position = position + camera.transform.forward * 0.6f;
+                Physics.SyncTransforms();
+                rig.SelectOrbitPivotFromView();
+                Assert.That(rig.GetOrbitDistance(), Is.GreaterThanOrEqualTo(rig.GetMinimumOrbitDistance()));
+                rig.ApplyOrbitFrame(DeucarianOrbitInputSystemFrame.None, 1f / 60f);
+                Assert.That(Vector3.Distance(camera.transform.position, position), Is.LessThan(0.001f));
+            }
+            finally
+            {
+                Object.DestroyImmediate(surface);
+                Object.DestroyImmediate(root);
+            }
+        }
+
+        [Test]
         public void RigAddsReadyToUseOrbitAndFlySources()
         {
             GameObject rigObject = new GameObject("Navigation Rig");

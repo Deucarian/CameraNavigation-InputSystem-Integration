@@ -140,6 +140,23 @@ namespace Deucarian.CameraNavigation.InputSystemIntegration
             orbitController.SyncZoomState(ResolveCamera(), controls);
         }
 
+        /// <summary>Select the current view's focus without moving or rotating the camera.</summary>
+        public void SelectOrbitPivotFromView()
+        {
+            Camera camera = ResolveCamera();
+            if (camera == null) return;
+
+            Ray ray = new Ray(camera.transform.position, camera.transform.forward);
+            float distance = orbitController.GetDistanceToPivot(camera, controls);
+            if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity,
+                    pivotLayers, pivotTriggerInteraction))
+                distance = hit.distance;
+
+            // Keep close surfaces outside the controller's minimum-distance correction.
+            distance = Mathf.Max(distance, GetMinimumOrbitDistance() * 1.001f);
+            SetPivot(ray.GetPoint(distance));
+        }
+
         public void SetReferenceBounds(Bounds bounds)
         {
             orbitController.SetReferenceBounds(bounds);
