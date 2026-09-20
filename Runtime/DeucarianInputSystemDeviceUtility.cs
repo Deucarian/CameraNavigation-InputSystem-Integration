@@ -87,9 +87,18 @@ namespace Deucarian.CameraNavigation.InputSystemIntegration
             float normalization = settings != null
                 ? settings.ScrollNormalization
                 : DeucarianInputSystemNavigationSettings.DefaultScrollNormalization;
+#if DEUCARIAN_INPUT_SYSTEM_NORMALIZED_SCROLL
+            // Unity 6 already converts platform wheel units to detents. Preserve the
+            // configured relative sensitivity without dividing those detents by 120 again.
+            if (InputSystem.settings.scrollDeltaBehavior ==
+                InputSettings.ScrollDeltaBehavior.UniformAcrossAllPlatforms)
+            {
+                normalization /= DeucarianInputSystemNavigationSettings.DefaultScrollNormalization;
+            }
+#endif
             return Mathf.Abs(scroll) <= 0.0001f
                 ? 0f
-                : scroll / Mathf.Max(0.0001f, normalization);
+                : scroll / normalization;
         }
 
         internal static Vector2 NormalizePointerDelta(
