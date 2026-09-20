@@ -12,6 +12,12 @@
   "precompiledReferences": [],
   "autoReferenced": true,
   "defineConstraints": [],
-  "versionDefines": [],
+  "versionDefines": [
+    {
+      "name": "Unity",
+      "expression": "6000.0.9",
+      "define": "DEUCARIAN_INPUT_SYSTEM_NORMALIZED_SCROLL"
+    }
+  ],
   "noEngineReferences": false
 }
