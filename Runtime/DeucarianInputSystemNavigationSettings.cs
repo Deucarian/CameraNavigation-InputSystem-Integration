@@ -35,6 +35,8 @@ namespace Deucarian.CameraNavigation.InputSystemIntegration
         [Tooltip("Scales raw Input System pointer pixels before navigation consumes them.")]
         [SerializeField, Min(0f)] private float pointerDeltaScale =
             DefaultPointerDeltaScale;
+        [Tooltip("Wheel units per detent in legacy input (120 by default). Unity's uniform " +
+                 "scroll mode automatically preserves the same relative sensitivity.")]
         [SerializeField, Min(0.0001f)] private float scrollNormalization =
             DefaultScrollNormalization;
 
