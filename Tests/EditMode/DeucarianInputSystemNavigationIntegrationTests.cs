@@ -11,6 +11,87 @@ namespace Deucarian.CameraNavigation.InputSystemIntegration.Tests
     {
         private const float Tolerance = 0.0001f;
 
+#if DEUCARIAN_INPUT_SYSTEM_NORMALIZED_SCROLL
+        [TestCase(true, 1f, 0f, 1f)]
+        [TestCase(true, -1f, 120f, -1f)]
+        [TestCase(true, 0.25f, 120f, 0.25f)]
+        [TestCase(true, 3f, 120f, 3f)]
+        [TestCase(true, 1f, 240f, 0.5f)]
+        [TestCase(false, 120f, 0f, 1f)]
+        [TestCase(false, -120f, 120f, -1f)]
+        [TestCase(false, 30f, 120f, 0.25f)]
+        [TestCase(false, 360f, 120f, 3f)]
+        [TestCase(false, 120f, 240f, 0.5f)]
+        public void WheelInputPreservesDetentsInBothScrollModes(
+            bool uniform, float delta, float normalization, float expected)
+        {
+            InputSystem.settings.scrollDeltaBehavior = uniform
+                ? InputSettings.ScrollDeltaBehavior.UniformAcrossAllPlatforms
+                : InputSettings.ScrollDeltaBehavior.KeepPlatformSpecificInputRange;
+            Mouse mouse = InputSystem.AddDevice<Mouse>();
+            var root = new GameObject("Wheel input units");
+            DeucarianInputSystemNavigationSettings settings = null;
+            try
+            {
+                if (normalization > 0f)
+                {
+                    settings = ScriptableObject.CreateInstance<DeucarianInputSystemNavigationSettings>();
+                    settings.ScrollNormalization = normalization;
+                }
+                var orbit = root.AddComponent<DeucarianOrbitInputSystemSource>();
+                var fly = root.AddComponent<DeucarianFlyInputSystemSource>();
+                orbit.Settings = settings;
+                fly.Settings = settings;
+                InputSystem.QueueStateEvent(mouse, new MouseState { scroll = new Vector2(0f, delta) });
+                InputSystem.Update();
+
+                Assert.That(orbit.ReadFrame().NavigationInput.Zoom, Is.EqualTo(expected).Within(Tolerance));
+                Assert.That(fly.ReadInput().Zoom, Is.EqualTo(expected).Within(Tolerance));
+            }
+            finally
+            {
+                Object.DestroyImmediate(root);
+                Object.DestroyImmediate(settings);
+            }
+        }
+
+        [TestCase(false)]
+        [TestCase(true)]
+        public void UniformWheelInputReachesTheDefaultCameraZoomDistance(bool flyMode)
+        {
+            InputSystem.settings.scrollDeltaBehavior = InputSettings.ScrollDeltaBehavior.UniformAcrossAllPlatforms;
+            Mouse mouse = InputSystem.AddDevice<Mouse>();
+            var root = new GameObject("Default wheel response");
+            var controls = DeucarianCameraNavigationControls.CreateRuntimeDefault();
+            try
+            {
+                var camera = root.AddComponent<Camera>();
+                camera.transform.position = new Vector3(0f, 0f, -10f);
+                var orbitSource = root.AddComponent<DeucarianOrbitInputSystemSource>();
+                var flySource = root.AddComponent<DeucarianFlyInputSystemSource>();
+                var orbit = new DeucarianOrbitCameraController();
+                var fly = new DeucarianFlyCameraController();
+                orbit.SetPivot(Vector3.zero);
+                InputSystem.QueueStateEvent(mouse, new MouseState { scroll = new Vector2(0f, 1f) });
+                InputSystem.Update();
+                if (flyMode) fly.Apply(camera, flySource.ReadInput(), 0f, controls, 10f);
+                else orbit.Apply(camera, orbitSource.ReadFrame().NavigationInput, 0f, controls);
+                Assert.That(camera.transform.position.z, Is.EqualTo(-10f), "Wheel input must stay smooth.");
+                for (int frame = 0; frame < 120; frame++)
+                {
+                    if (flyMode) fly.Apply(camera, DeucarianFlyCameraInput.None, 1f / 60f, controls, 10f);
+                    else orbit.Apply(camera, DeucarianOrbitCameraInput.None, 1f / 60f, controls);
+                }
+                Assert.That(camera.transform.position.magnitude, Is.InRange(6.5f, 8f));
+            }
+            finally
+            {
+                Object.DestroyImmediate(root);
+                Object.DestroyImmediate(controls);
+            }
+        }
+#endif
+
         [TestCase(false)]
         [TestCase(true)]
         public void FlyLookWaitsForCaptureWithoutLatchingAnAcceptedGesture(bool gestureRejected)
@@ -684,6 +765,7 @@ namespace Deucarian.CameraNavigation.InputSystemIntegration.Tests
         [Test]
         public void OrbitInputSourceMapsDevicesAndHonorsApplicationBlocking()
         {
+            InputSystem.settings.scrollDeltaBehavior = InputSettings.ScrollDeltaBehavior.KeepPlatformSpecificInputRange;
             Mouse mouse = InputSystem.AddDevice<Mouse>();
             Keyboard keyboard = InputSystem.AddDevice<Keyboard>();
             GameObject sourceObject = new GameObject("Orbit Input Source");
@@ -703,6 +785,7 @@ namespace Deucarian.CameraNavigation.InputSystemIntegration.Tests
                     {
                         position = new Vector2(200f, 100f),
                         delta = new Vector2(6f, -2f),
+                        // This fixture supplies legacy platform units directly.
                         scroll = new Vector2(0f, 120f)
                     }.WithButton(MouseButton.Right));
                 InputSystem.Update();

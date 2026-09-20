@@ -19,7 +19,13 @@
   "defineConstraints": [
     "UNITY_INCLUDE_TESTS"
   ],
-  "versionDefines": [],
+  "versionDefines": [
+    {
+      "name": "Unity",
+      "expression": "6000.0.9",
+      "define": "DEUCARIAN_INPUT_SYSTEM_NORMALIZED_SCROLL"
+    }
+  ],
   "optionalUnityReferences": [
     "TestAssemblies"
   ],
